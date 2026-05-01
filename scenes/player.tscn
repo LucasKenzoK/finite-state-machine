@@ -99,6 +99,84 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dqkch"]
 size = Vector2(14, 15.5)
 
+[sub_resource type="Animation" id="Animation_dqkch"]
+resource_name = "Jump_land"
+tracks/0/type = "method"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"values": []
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.06666667, 0.16666667, 0.3),
+"transitions": PackedFloat32Array(1, 5, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.25, 0.9), Vector2(0.9, 1.25), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_g2els"]
+resource_name = "Jump_start"
+tracks/0/type = "method"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(),
+"transitions": PackedFloat32Array(),
+"values": []
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("AnimatedSprite2D:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.2),
+"transitions": PackedFloat32Array(1, 1.9318724, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.25, 0.45), Vector2(0.75, 1.25)]
+}
+
+[sub_resource type="Animation" id="Animation_qhqgy"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("AnimatedSprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_qhqgy"]
+_data = {
+&"Jump_land": SubResource("Animation_dqkch"),
+&"Jump_start": SubResource("Animation_g2els"),
+&"RESET": SubResource("Animation_qhqgy")
+}
+
+[sub_resource type="Curve" id="Curve_g2els"]
+_data = [Vector2(0.22678572, 0.85161996), 0.0, 0.0, 0, 0, Vector2(0.77678573, 0.34425616), 0.0, 0.0, 0, 0]
+point_count = 2
+
 [node name="Player" type="CharacterBody2D" unique_id=163265734]
 script = ExtResource("1_g2els")
 acceleration = 4000.0
@@ -116,3 +194,25 @@ animation = &"Jump"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1968058181]
 position = Vector2(0, 0.25)
 shape = SubResource("RectangleShape2D_dqkch")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1883756331]
+libraries/ = SubResource("AnimationLibrary_qhqgy")
+
+[node name="CPUParticles2D" type="CPUParticles2D" parent="." unique_id=1066734512]
+texture_filter = 1
+position = Vector2(0, 7)
+emitting = false
+amount = 10
+lifetime = 0.2
+one_shot = true
+explosiveness = 0.9
+emission_shape = 3
+emission_rect_extents = Vector2(6.985, 1)
+direction = Vector2(0, 1)
+spread = 75.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 80.0
+initial_velocity_max = 150.0
+scale_amount_min = 1.5
+scale_amount_max = 2.0
+scale_amount_curve = SubResource("Curve_g2els")

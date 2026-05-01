@@ -22,6 +22,8 @@ var coyote_timer = 0.0
 var jump_buffer_timer = 0.0
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
+@onready var animation_player: AnimationPlayer = $AnimationPlayer
+@onready var jump_particles: CPUParticles2D = $CPUParticles2D
 
 func _physics_process(delta: float) -> void:
 	_apply_gravity(delta)
@@ -74,8 +76,27 @@ func resolve_state() -> void:
 			new_state = States.IDLE
 	
 	if new_state != current_state:
+		_on_state_changed(current_state, new_state)
 		current_state = new_state
 		animate_state()
+
+##squash and stretch
+func _on_state_changed(from: States , to: States) -> void:
+	if to == States.JUMPING:
+		animation_player.stop()
+		animation_player.play("Jump_start")
+		_burst_particles()
+		
+		
+	elif to == States.IDLE or to == States.RUNNING:
+		if from == States.FALLING or from == States.JUMPING:
+			animation_player.stop()
+			animation_player.play("Jump_land")
+			_burst_particles()
+
+func _burst_particles() -> void:
+	jump_particles.restart()
+	jump_particles.emitting = true
 
 func animate_state() -> void:
 	match current_state:
@@ -87,3 +108,4 @@ func animate_state() -> void:
 			animated_sprite_2d.play("Jump")
 		States.FALLING:
 			animated_sprite_2d.play("Fall")
+
