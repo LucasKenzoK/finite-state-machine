@@ -1,49 +1,60 @@
-extends CharacterBody2D
+extends Character
 
 # mov vars
 @export_group("Movement")
-@export var speed = 200.00
-@export var acceleration = 1500.00
-@export var friction = 2500.00			## no input
-@export var deceleration = 3000.00		## changin direction
+@export var speed := 200.00
+@export var acceleration := 1500.00
+@export var friction := 2500.00			
+@export var deceleration := 3000.00		
 
 @export_group("Jump")
-@export var jump_velocity = -400.00
+@export var jump_velocity := -400.00
 @export var jump_cut_multiplier := 0.4
-@export var fall_gravity_multiplier := 2.0
-@export var coyote_time = 0.5
-@export var jump_buffer_time = 0.5
+@export var coyote_time := 0.5
+@export var jump_buffer_time := 0.5
 
 ## States
 enum States {IDLE, RUNNING, JUMPING, FALLING}
 var current_state: States = States.IDLE
 
-var coyote_timer = 0.0
-var jump_buffer_timer = 0.0
+var coyote_timer := 0.0
+var jump_buffer_timer := 0.0
 
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var animation_player: AnimationPlayer = $AnimationPlayer
 @onready var jump_particles: CPUParticles2D = $CPUParticles2D
 
 func _physics_process(delta: float) -> void:
+	if is_dead:
+		return
 	_apply_gravity(delta)
 	_update_timers(delta)
 	_handle_horizontal(delta)
-	_hanlde_jump()
+	_handle_jump()
 	move_and_slide()
 	resolve_state()
-	
-func _apply_gravity(delta:float) -> void:
-	if velocity.y > 0:
-		velocity += get_gravity() * fall_gravity_multiplier * delta
-	else:
-		velocity += get_gravity() * delta
+
+func _ready() -> void:
+	health_changed.connect(func(current, maximum): print("HP: %d/%d" % [current, maximum])) ### DEBUG HEALTH
+
+func _unhandled_input(event: InputEvent) -> void: ## DEBUG DANO
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_K:
+		take_damage(10)
+
+func _on_damaged(_amount: int, _source: Node) -> void:
+	print("Hurt")
+
+func _on_death() -> void:
+	animated_sprite_2d.modulate = Color.RED
+	await get_tree().create_timer(1.0).timeout
+	get_tree().reload_current_scene()
+	queue_free()
 
 func _update_timers(delta: float) -> void:
-	coyote_timer = coyote_time if is_on_floor() else coyote_timer - delta
+	coyote_timer = coyote_time if is_on_floor() else coyote_timer - max(coyote_timer - delta, 0.0)
 	jump_buffer_timer = jump_buffer_time if Input.is_action_just_pressed("ui_accept") else jump_buffer_timer - delta
 
-func _hanlde_jump() -> void:
+func _handle_jump() -> void:
 	if jump_buffer_timer > 0 and coyote_timer > 0:
 		velocity.y = jump_velocity
 		coyote_timer = 0
@@ -80,13 +91,11 @@ func resolve_state() -> void:
 		current_state = new_state
 		animate_state()
 
-##squash and stretch
 func _on_state_changed(from: States , to: States) -> void:
 	if to == States.JUMPING:
 		animation_player.stop()
 		animation_player.play("Jump_start")
 		_burst_particles()
-		
 		
 	elif to == States.IDLE or to == States.RUNNING:
 		if from == States.FALLING or from == States.JUMPING:
@@ -108,4 +117,3 @@ func animate_state() -> void:
 			animated_sprite_2d.play("Jump")
 		States.FALLING:
 			animated_sprite_2d.play("Fall")
-

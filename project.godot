@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="finiteStateMachine"
+config/name="PlataformGaijin"
 run/main_scene="uid://vjubb6g8vjcc"
 config/features=PackedStringArray("4.6", "Forward Plus")
 
